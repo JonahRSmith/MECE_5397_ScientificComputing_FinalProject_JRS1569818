@@ -28,6 +28,6 @@
 #
 # Two discretizations will be used and their solutions are compared to one another
 # Discretization 1: Explicit
-# Discretization 2: Crank-Nicolson (Implicit)
+# Discretization 2: ADI Method (Solve a 2D diffusion equation using two tri-diagonal matrices)
 #
 # Time integration is carried out to steady state, and grid convergence is satisfied
