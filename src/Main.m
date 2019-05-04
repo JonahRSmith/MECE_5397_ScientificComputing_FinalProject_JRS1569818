@@ -12,9 +12,9 @@ ui=questdlg('Which solution method would you like to use?','Choose Solution Rout
 
 ax=0; bx=2*pi;
 ay=0; by=2*pi;
-nodefacx=3;
-nodefacy=3;
-DTIMEI=0.0025; %Explicit routine requires smaller DTIMEI than ADI for convergence to steady state
+nodefacx=6;
+nodefacy=6;
+DTIMEI=0.01; %Explicit routine requires smaller DTIMEI than ADI for convergence to steady state
 maxrelerror=1e-14; %Max relative error to classify steady state
 savefilename='Save_Explicit_001.mat';
 %1/DTIMEI = Frequency a save is made, and that convergence is checked

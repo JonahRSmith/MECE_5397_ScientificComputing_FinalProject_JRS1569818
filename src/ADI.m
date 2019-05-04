@@ -61,8 +61,8 @@ else
     savefilename = varargin{9};
     
     %Calculate number of internal nodes in X and Y using the following formula
-    xnodes = (ceil(4^(nodefacx)));
-    ynodes = (ceil(4^(nodefacy)));
+    xnodes = (ceil(2^(nodefacx)));
+    ynodes = (ceil(2^(nodefacy)));
     DX = (bx-ax)/(xnodes-1);
     DY = (by-ay)/(ynodes-1);
     x = zeros(xnodes,1);

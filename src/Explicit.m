@@ -61,8 +61,8 @@ else
     savefilename = varargin{9};
     
     %Calculate number of internal nodes in X and Y using the following formula
-    xnodes = (ceil(4^(nodefacx)));
-    ynodes = (ceil(4^(nodefacy)));
+    xnodes = (ceil(2^(nodefacx)));
+    ynodes = (ceil(2^(nodefacy)));
     DX = (bx-ax)/(xnodes-1);
     DY = (by-ay)/(ynodes-1);
     x = zeros(xnodes,1);
@@ -80,18 +80,18 @@ else
     %Setting up guess for initial value of u
     fb = (bx-x).^2 .* cos(pi*x/bx); %Vector containing fb(x) at each x
     gb = x.*(bx-x).^2; %Vector containing gb(x) at each x
-    for xi=1:xnodes %Top and bottom Dirichlet conditions
-        u(xi,1) = gb(xi);
-        u(xi,ynodes) = fb(xi);
+    %Setting up y=ax and y=bx Dirichlet conditions
+    for xi=1:xnodes %xnodes is the number of nodes in the x direction
+        u(xi,1) = gb(xi); %Index 1 in y is the y=ax boundary
+        u(xi,ynodes) = fb(xi); %Index ynodes in y is the y=bx boundary
         %Initial guess: linear relationship between top and bottom
         for yi=2:ynodes-1
+            %DY = delta-y between each node in the y-direction.
             u(xi,yi) = ((ay+DY*(yi-1))/(ay+by))*(u(xi,ynodes)-u(xi,1))+u(xi,1);
         end
-        %Though it might be better just to assume a 0
     end
-    %Dirichlet condition on x=ax boundary
+    %Setting up Dirichlet condition on x=ax boundary
     for yi=1:ynodes
-        %gb(ax) + (y-ay)/(by-ay)*(fb(ax)-gb(ax))
         u(1,yi)=gb(1) + (y(yi)-ay)/(by-ay)*(fb(1)-gb(1));
     end
     clear yi
