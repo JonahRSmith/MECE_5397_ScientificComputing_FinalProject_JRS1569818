@@ -1,4 +1,4 @@
-function [ x,y,u ] = ADI( varargin )
+function [ x,y,u,runtime ] = ADI( varargin )
 %Solve a 2D diffusion equation using the ADI method
 %Solution is ran to steady state
 %Saves of the workspace are made at regular intervals
@@ -85,9 +85,8 @@ else
         u(xi,ynodes) = fb(xi);
         %Initial guess: linear relationship between top and bottom
         for yi=2:ynodes-1
-            u(xi,yi) = ((ay+DY*(yi-1))/(ay+by))*(u(xi,ynodes)-u(xi,1))+u(xi,1);
+            u(xi,yi) = (y(yi)-ay)/(by-ay)*(u(xi,ynodes)-u(xi,1))+u(xi,1);
         end
-        %Though it might be better just to assume a 0
     end
     %Dirichlet condition on x=ax boundary
     for yi=1:ynodes
@@ -164,6 +163,7 @@ end
 fprintf('TIMEN=%g; Max relative error is %g; ',TIMEN,relerror); toc;
 convergence=(relerror<=maxrelerror);
 save(savefilename);
+runtime=toc;
 end
 fprintf('Convegence met at TIMEN=%g\n',TIMEN);
 

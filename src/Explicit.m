@@ -1,4 +1,4 @@
-function [ x,y,u ] = ADI( varargin )
+function [ x,y,u,runtime ] = Explicit( varargin )
 %Solve a 2D diffusion equation using the ADI method
 %Solution is ran to steady state
 %Saves of the workspace are made at regular intervals
@@ -30,7 +30,7 @@ function [ x,y,u ] = ADI( varargin )
 
 desired_inputs = 9;
 tic;
-fprintf('Setting up problem to perform ADI routine.\n');
+fprintf('Setting up problem to perform Explicit routine.\n');
 
 if nargin < 1, error('Must provide arguments when calling ADI.m'); end
 if nargin == 1,
@@ -81,14 +81,14 @@ else
     fb = (bx-x).^2 .* cos(pi*x/bx); %Vector containing fb(x) at each x
     gb = x.*(bx-x).^2; %Vector containing gb(x) at each x
     %Setting up y=ax and y=bx Dirichlet conditions
-    for xi=1:xnodes %xnodes is the number of nodes in the x direction
-        u(xi,1) = gb(xi); %Index 1 in y is the y=ax boundary
-        u(xi,ynodes) = fb(xi); %Index ynodes in y is the y=bx boundary
+    for xi=1:xnodes %Top and bottom Dirichlet conditions
+        u(xi,1) = gb(xi);
+        u(xi,ynodes) = fb(xi);
         %Initial guess: linear relationship between top and bottom
         for yi=2:ynodes-1
-            %DY = delta-y between each node in the y-direction.
-            u(xi,yi) = ((ay+DY*(yi-1))/(ay+by))*(u(xi,ynodes)-u(xi,1))+u(xi,1);
+            u(xi,yi) = (y(yi)-ay)/(by-ay)*(u(xi,ynodes)-u(xi,1))+u(xi,1);
         end
+        %Though it might be better just to assume a 0
     end
     %Setting up Dirichlet condition on x=ax boundary
     for yi=1:ynodes
@@ -114,18 +114,16 @@ for zz=1:savefreq %Solving this many iterations before savings and checking for 
 %of the others within a single timestep. This does however require a more
 %refined DTIMEI in order to not have issues with divergence or oscillations
 %in failure to converge.
-uprev=u;
-for j=2:ynodes-1
-    for i=2:xnodes-1
+uprev=u; %uprev holds the solution for u from the previous timestep
+for j=2:ynodes-1 %Because I set up u to contain the boundaries inside of it,
+    for i=2:xnodes-1 %No extra code is needed to apply Dirichlet conditions
         u(i,j) = uprev(i,j) + DTIMEIperDX2*(uprev(i-1,j)-2*uprev(i,j)+uprev(i+1,j)) + DTIMEIperDY2*(uprev(i,j-1)-2*uprev(i,j)+uprev(i,j+1));
     end
     %Now solving at i=xnodes, the Neumann boundary
-    u(xnodes,j) = uprev(xnodes,j) + DTIMEIperDX2*(2*uprev(xnodes-1,j)-2*uprev(xnodes,j)) + DTIMEIperDY2*(uprev(xnodes,j-1)-2*uprev(xnodes,j)+uprev(xnodes,j+1));
+    u(xnodes,j) = uprev(xnodes,j) + 2*DTIMEIperDX2*(uprev(xnodes-1,j)-uprev(xnodes,j)) + DTIMEIperDY2*(uprev(xnodes,j-1)-2*uprev(xnodes,j)+uprev(xnodes,j+1));
 end
-    
+TIMEN = TIMEN+DTIMEI;
 %=-=-=-=-=-==-=-=-=-=-==-=-=-=-=-==-=-=-=-=-==-=-=-=-=-==-=-=-=-=-==-=-=-=-=-==-=-=-=-=-=
-    TIMEN = TIMEN+DTIMEI;
-    %fprintf('TIMEN=%g\n',TIMEN);
 end
 %Check for convergence
 relerror=0;
@@ -137,6 +135,7 @@ end
 fprintf('TIMEN=%g; Max relative error is %g; ',TIMEN,relerror); toc;
 convergence=(relerror<=maxrelerror);
 save(savefilename);
+runtime=toc;
 end
 fprintf('Convegence met at TIMEN=%g\n',TIMEN);
 
